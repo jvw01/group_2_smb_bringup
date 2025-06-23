@@ -83,6 +83,18 @@ def generate_launch_description():
             "registered_pointcloud_topic": "/registered_scan",
         }.items(),
     )
+
+    # dlio_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([
+    #         PathJoinSubstitution([
+    #             FindPackageShare("open3d_slam_ros"),
+    #             "launch",
+    #             "summer_school_slam_robot_launch.py"
+    #         ])
+    #     ]),
+    #     launch_arguments={
+    #     }.items(),
+    # )
     
     relay_odom_to_dlio = Node(
         package="topic_tools",

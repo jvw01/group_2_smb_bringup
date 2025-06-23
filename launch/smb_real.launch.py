@@ -35,11 +35,16 @@ def generate_launch_description():
         output="screen",
     )
 
-    low_level_controller = Node(
-        package="smb_low_level_controller_gazebo",
-        executable="smb_low_level_controller_gazebo_node",
-        name="smb_low_level_controller_gazebo_node",
-        output="screen",
+    low_level_controller = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare("smb_low_level_controller"),
+                "launch",
+                "speed_control_node.launch.py"
+            ])
+        ]),
+        launch_arguments={
+        }.items(),
     )
 
     terrain_analysis = Node(
@@ -141,12 +146,12 @@ def generate_launch_description():
         respawn=False,
     )
 
-    twist_mux = Node(
-        package='twist_mux',
-        executable='twist_mux',
-        output='screen',
-        remappings={('/cmd_vel_out', '/cmd_vel')},
-    )
+    # twist_mux = Node(
+    #     package='twist_mux',
+    #     executable='twist_mux',
+    #     output='screen',
+    #     remappings={('/cmd_vel_out', '/cmd_vel')},
+    # )
 
     sensors_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -172,7 +177,7 @@ def generate_launch_description():
         exploration_launch,
         local_planner_launch,
         twist_pid,
-        twist_mux,
+        # twist_mux,
         rviz2,
         sensors_launch,
     ])
