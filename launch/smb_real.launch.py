@@ -10,7 +10,6 @@ from launch.conditions import UnlessCondition, IfCondition
 import os
 
 
-
 def generate_launch_description():
     default_config_topics = os.path.join(get_package_share_directory('smb_bringup'), 'config', 'twist_mux_topics.yaml')
     launch_args = [
@@ -88,6 +87,14 @@ def generate_launch_description():
         name="smb_global_to_local_odometry",
         output="screen",
     )
+
+    exploration_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [get_package_share_directory('tare_planner'), '/explore_robotx.launch']),
+        launch_arguments={
+            "rviz": "false",
+        }.items(),
+    )
     
     far_planner_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -140,7 +147,17 @@ def generate_launch_description():
         output='screen',
         remappings={('/cmd_vel_out', '/cmd_vel')},
     )
-    
+
+    sensors_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([
+                FindPackageShare("smb_bringup"),
+                "launch",
+                "sensors.launch.py"
+            ])
+        ),
+    )
+
     return LaunchDescription([
         *launch_args,
         kinematics_controller,
@@ -152,8 +169,10 @@ def generate_launch_description():
         local_odometry,
         static_tf_map_to_odom,
         far_planner_launch,
+        exploration_launch,
         local_planner_launch,
         twist_pid,
         twist_mux,
         rviz2,
+        sensors_launch,
     ])
