@@ -146,12 +146,16 @@ def generate_launch_description():
         respawn=False,
     )
 
-    # twist_mux = Node(
-    #     package='twist_mux',
-    #     executable='twist_mux',
-    #     output='screen',
-    #     remappings={('/cmd_vel_out', '/cmd_vel')},
-    # )
+    twist_mux = Node(
+        package='twist_mux',
+        executable='twist_mux',
+        output='screen',
+        remappings={('/cmd_vel_out', '/cmd_vel')},
+        parameters=[
+            {'use_sim_time': False},
+            LaunchConfiguration('config_topics')
+        ]
+    )
 
     sensors_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -177,7 +181,7 @@ def generate_launch_description():
         exploration_launch,
         local_planner_launch,
         twist_pid,
-        # twist_mux,
+        twist_mux,
         rviz2,
         sensors_launch,
     ])
