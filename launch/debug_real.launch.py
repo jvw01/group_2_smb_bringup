@@ -12,6 +12,11 @@ import os
 
 def generate_launch_description():
     
+    launch_args = [
+        DeclareLaunchArgument('use_sim_time', default_value='true'),
+        DeclareLaunchArgument('launch_rviz', default_value='true'),
+    ]
+
     static_tf_map_to_odom = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
@@ -34,7 +39,7 @@ def generate_launch_description():
         executable="smb_kinematics_node",
         name="smb_kinematics_node",
         output="screen",
-        parameters=[{"use_sim_time": False}],
+        parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
     )
 
     # Path to the URDF file
@@ -54,7 +59,7 @@ def generate_launch_description():
         executable="robot_state_publisher",
         name="robot_state_publisher",
         output="screen",
-        parameters=[{"robot_description": robot_description, "use_sim_time": False}],    
+        parameters=[{"robot_description": robot_description, "use_sim_time": LaunchConfiguration("use_sim_time")}],    
     )
 
     rslidar_config_file = get_package_share_directory('smb_bringup') + '/config/rslidar_config.yaml'
@@ -81,7 +86,7 @@ def generate_launch_description():
         executable="smb_cmd_vel",
         name="smb_cmd_vel",
         output="screen",
-        parameters=[{"use_sim_time": False}],
+        parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
     )
     
     joy = Node(
@@ -89,7 +94,7 @@ def generate_launch_description():
         executable="joy_node",
         name="joy_node",
         output="log",
-        parameters=[{"use_sim_time": False}],
+        parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
     )
 
     # Terrain analysis launch include
@@ -149,7 +154,7 @@ def generate_launch_description():
         executable="odometry_and_pointcloud_conversion_graph_msf",
         name="odometry_and_pointcloud_conversion_graph_msf",
         output="screen",
-        parameters=[{"use_sim_time": False}],
+        parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}],
     )
     
     far_planner_launch = IncludeLaunchDescription(
@@ -166,7 +171,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             [get_package_share_directory('tare_planner'), '/explore_robotx.launch']),
         launch_arguments={
-            "use_sim_time": "false",
+            "use_sim_time": LaunchConfiguration("use_sim_time"),
             "rviz": "true",
         }.items(),
     )
@@ -220,7 +225,7 @@ def generate_launch_description():
         output='screen',
         remappings={('/cmd_vel_out', '/cmd_vel')},
         parameters=[
-            {'use_sim_time': False},
+            {'use_sim_time': LaunchConfiguration("use_sim_time")},
             LaunchConfiguration('config_topics')]
     )
 
@@ -242,14 +247,19 @@ def generate_launch_description():
                 "summer_school_slam_robot_launch.py"
             ])
         ),
+        launch_arguments={
+            "use_sim_time": LaunchConfiguration("use_sim_time"),
+            "launch_rviz": LaunchConfiguration("launch_rviz"),
+        }.items(),
     ) 
     
     
     
     return LaunchDescription([
+        *launch_args,
         # gazebo_launch,
         robot_state_publisher_node,
-        rslidar,
+        # rslidar,
         kinematics_controller,
         low_level_controller,
         # joy_to_cmd_vel,
@@ -263,7 +273,7 @@ def generate_launch_description():
         local_odometry,
         static_tf_map_to_odom,
         static_tf_map_to_graph_msf,
-        # exploration_launch,
+        exploration_launch,
         # far_planner_launch,
         # local_planner_launch,
         twist_pid,
